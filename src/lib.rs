@@ -90,8 +90,8 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     out.into()
 }
 
-#[proc_macro_derive(DeserializeTupleOrNot, attributes(serde, serde_tuple))]
-pub fn derive_deserialize_tuple_or_not(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(DeserializeMaybeTuple, attributes(serde, serde_tuple))]
+pub fn derive_deserialize_maybe_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;

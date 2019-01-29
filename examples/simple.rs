@@ -2,7 +2,7 @@ use serde_tuple::*;
 
 use std::borrow::Cow;
 
-#[derive(Debug, SerializeTuple, DeserializeTupleOrNot)]
+#[derive(Debug, SerializeTuple, DeserializeMaybeTuple)]
 pub struct Foo {
     #[serde(rename = "boop")]
     #[serde_tuple(position = 1)]
