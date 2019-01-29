@@ -1,7 +1,11 @@
 use proc_macro2::Span;
-use syn::parse::{Error, Parse, ParseStream, Parser, Result};
-use syn::{parenthesized, Data, DeriveInput, Expr, Field, Fields, Ident, ItemStruct, Generics, Attribute, Meta, Path, Lit, NestedMeta, parse_quote};
 use quote::quote;
+use syn::{
+    parenthesized,
+    parse::{Error, Parse, ParseStream, Parser, Result},
+    parse_quote, Attribute, Data, DeriveInput, Expr, Field, Fields, Generics, Ident, ItemStruct,
+    Lit, Meta, NestedMeta, Path
+};
 
 pub struct WrappedItemStruct(pub ItemStruct);
 
@@ -24,9 +28,10 @@ impl Parse for WrappedItemStruct {
 
 fn get_field_position(attrs: &[Attribute]) -> Option<u64> {
     let serde_tuple_path: Path = parse_quote!(serde_tuple);
-    let metas = attrs.iter()
+    let metas = attrs
+        .iter()
         .filter(|x| x.path == serde_tuple_path)
-        .flat_map(|x| Attribute::parse_meta(x) )
+        .flat_map(|x| Attribute::parse_meta(x))
         .collect::<Vec<_>>();
     if let Some(position) = metas
         .into_iter()
@@ -34,7 +39,7 @@ fn get_field_position(attrs: &[Attribute]) -> Option<u64> {
             Meta::List(y) => Some(y),
             _ => None
         })
-        .flat_map(|x| x.nested.into_iter() )
+        .flat_map(|x| x.nested.into_iter())
         .filter_map(|x| match x {
             NestedMeta::Meta(y) => Some(y),
             _ => None
@@ -70,11 +75,11 @@ pub fn get_sorted_fields(fields: &Fields) -> Vec<&Field> {
                 if !seen.insert(*pos) {
                     panic!("`position` must be unique for each field");
                 }
-            },
+            }
             None => {
                 has_unspecified_position = true;
             }
-        }  
+        }
         opt_pos
     });
 

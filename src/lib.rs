@@ -1,11 +1,11 @@
-#![recursion_limit="128"]
+#![recursion_limit = "128"]
 
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::quote;
 use syn::*;
-use proc_macro2::Span;
 
 mod parse;
 
@@ -21,14 +21,14 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
 
     let fields = parse::get_sorted_fields(&item.fields);
 
-    let (field_tys, field_calls): (Vec<_>, Vec<_>) = fields.iter()
+    let (field_tys, field_calls): (Vec<_>, Vec<_>) = fields
+        .iter()
         .map(|field| {
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
             (quote!(&'a #ty), quote!(&self.#ident))
         })
         .unzip();
-
 
     let out = quote! {
         impl serde::Serialize for #ident {
@@ -47,7 +47,6 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     };
 
     out.into()
-
 }
 
 #[proc_macro_derive(DeserializeTuple, attributes(serde_tuple))]
@@ -60,7 +59,8 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
 
     let fields = parse::get_sorted_fields(&item.fields);
 
-    let (field_tys, field_calls): (Vec<_>, Vec<_>) = fields.iter()
+    let (field_tys, field_calls): (Vec<_>, Vec<_>) = fields
+        .iter()
         .enumerate()
         .map(|(idx, field)| {
             let ident = field.ident.as_ref().unwrap();
@@ -68,7 +68,6 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
             (quote!(#ty), quote!(#ident: inner.#idx))
         })
         .unzip();
-
 
     let out = quote! {
         impl<'de> serde::Deserialize<'de> for #ident {
@@ -104,7 +103,7 @@ pub fn derive_deserialize_tuple_or_not(input: TokenStream) -> TokenStream {
 
     for field in inner.fields.iter_mut() {
         let serde_tuple_attr: Path = parse_quote!(serde_tuple);
-        field.attrs = field.attrs.drain(..).filter(|x| x.path != serde_tuple_attr ).collect();
+        field.attrs = field.attrs.drain(..).filter(|x| x.path != serde_tuple_attr).collect();
     }
 
     let mut inner_as_tup = item.clone();
@@ -112,10 +111,10 @@ pub fn derive_deserialize_tuple_or_not(input: TokenStream) -> TokenStream {
 
     for field in inner_as_tup.fields.iter_mut() {
         let serde_attr: Path = parse_quote!(serde);
-        field.attrs = field.attrs.drain(..).filter(|x| x.path != serde_attr ).collect();
+        field.attrs = field.attrs.drain(..).filter(|x| x.path != serde_attr).collect();
     }
 
-    let fields = &item.fields.iter().map(|x| x.ident.as_ref().unwrap() ).collect::<Vec<_>>();
+    let fields = &item.fields.iter().map(|x| x.ident.as_ref().unwrap()).collect::<Vec<_>>();
 
     let out = quote! {
         impl<'de> serde::Deserialize<'de> for #ident {
@@ -142,7 +141,7 @@ pub fn derive_deserialize_tuple_or_not(input: TokenStream) -> TokenStream {
                     EitherInner::Inner(Inner { #(#fields,)* }) => Ok(#ident { #(#fields,)* }),
                     EitherInner::InnerAsTup(InnerAsTup { #(#fields,)* }) => Ok(#ident { #(#fields,)* }),
                 }
-                
+
             }
         }
     };
