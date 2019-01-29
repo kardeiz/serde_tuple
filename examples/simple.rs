@@ -4,7 +4,7 @@ use std::borrow::Cow;
 
 #[derive(Debug, SerializeTuple, DeserializeMaybeTuple)]
 pub struct Foo {
-    #[serde(rename = "boop")]
+    #[serde(rename = "b-a-r")]
     #[serde_tuple(position = 1)]
     bar: Cow<'static, str>,
     #[serde_tuple(position = 0)]
@@ -27,7 +27,7 @@ fn main() {
 
     println!("{:?}", &foo);
 
-    let foo = serde_json::from_str::<Foo>("{\"boop\": \"Yes\", \"baz\": 22 }").unwrap();
+    let foo = serde_json::from_str::<Foo>("{\"b-a-r\": \"Yes\", \"baz\": 22 }").unwrap();
 
     println!("{:?}", &foo);
 }
