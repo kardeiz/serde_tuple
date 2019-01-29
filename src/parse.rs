@@ -1,9 +1,8 @@
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parenthesized,
-    parse::{Error, Parse, ParseStream, Parser, Result},
-    parse_quote, Attribute, Data, DeriveInput, Expr, Field, Fields, Generics, Ident, ItemStruct,
+    parse::{Error, Parse, ParseStream, Result},
+    parse_quote, Attribute, Field, Fields, Generics, ItemStruct,
     Lit, Meta, NestedMeta, Path
 };
 

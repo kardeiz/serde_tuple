@@ -96,8 +96,6 @@ pub fn derive_deserialize_tuple_or_not(input: TokenStream) -> TokenStream {
 
     let ident = &item.ident;
 
-    let ident_str = &ident.to_string();
-
     let mut inner = item.clone();
     inner.ident = Ident::new("Inner", Span::call_site());
 
