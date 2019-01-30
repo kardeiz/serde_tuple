@@ -2,7 +2,6 @@ use serde_tuple::*;
 
 use std::borrow::Cow;
 
-
 #[derive(Debug, Serialize_tuple, Deserialize_tuple)]
 pub struct Foo<'a, T: serde::Serialize + serde::de::DeserializeOwned> {
     string: Cow<'a, str>,
@@ -25,5 +24,4 @@ fn main() {
     let foo = serde_json::from_str::<Foo<Bar>>(&json).unwrap();
 
     println!("{:?}", &foo);
-
 }

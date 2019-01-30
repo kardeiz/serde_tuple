@@ -17,13 +17,12 @@ impl parse::Parse for WrappedItemStruct {
                 Err(Error::new(call_site, "struct fields must be named"))
             } else {
                 Ok(WrappedItemStruct(item))
-            }            
+            }
         } else {
             Err(Error::new(call_site, "input must be a struct"))
         }
     }
 }
-
 
 #[proc_macro_derive(Serialize_tuple, attributes(serde_tuple))]
 pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
@@ -33,7 +32,8 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let ident_str = &ident.to_string();
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
-    let (field_tys, field_calls): (Vec<_>, Vec<_>) = item.fields
+    let (field_tys, field_calls): (Vec<_>, Vec<_>) = item
+        .fields
         .iter()
         .map(|field| {
             let ident = field.ident.as_ref().unwrap();
@@ -78,7 +78,8 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let ident_str = &ident.to_string();
     let (_, ty_generics, where_clause) = item.generics.split_for_impl();
 
-    let (field_tys, field_calls): (Vec<_>, Vec<_>) = item.fields
+    let (field_tys, field_calls): (Vec<_>, Vec<_>) = item
+        .fields
         .iter()
         .enumerate()
         .map(|(idx, field)| {
@@ -100,7 +101,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
 
     de_generics.params.push(de_lifetime_def.into());
 
-    let (de_impl_generics, _, _) = de_generics.split_for_impl();
+    let (de_impl_generics, ..) = de_generics.split_for_impl();
 
     let out = quote! {
         impl #de_impl_generics serde::Deserialize<'de> for #ident #ty_generics #where_clause {
