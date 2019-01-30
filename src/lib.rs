@@ -1,3 +1,22 @@
+//! Derive macros to serialize and deserialize struct with named fields as an array of values
+//!
+//! # Examples
+//!
+//! ```
+//! use serde_tuple::*;
+//! 
+//! #[derive(Serialize_tuple, Deserialize_tuple)]
+//! pub struct Foo<'a> {
+//!     bar: &'a str,
+//!     baz: i32
+//! }
+
+//! let foo = Foo { bar: "Yes", baz: 22 };
+//! let json = serde_json::to_string(&foo).unwrap();
+//! println!("{}", &json);
+//! // # => ["Yes",22]
+//! ```
+
 #![recursion_limit = "128"]
 
 extern crate proc_macro;
