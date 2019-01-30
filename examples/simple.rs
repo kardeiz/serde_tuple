@@ -3,7 +3,7 @@ use serde_tuple::*;
 use std::borrow::Cow;
 
 
-#[derive(Debug, SerializeTuple, DeserializeTuple)]
+#[derive(Debug, Serialize_tuple, Deserialize_tuple)]
 pub struct Foo<'a, T: serde::Serialize + serde::de::DeserializeOwned> {
     string: Cow<'a, str>,
     baz: i32,

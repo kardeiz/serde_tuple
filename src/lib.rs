@@ -25,7 +25,7 @@ impl parse::Parse for WrappedItemStruct {
 }
 
 
-#[proc_macro_derive(SerializeTuple, attributes(serde_tuple))]
+#[proc_macro_derive(Serialize_tuple, attributes(serde_tuple))]
 pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
@@ -69,14 +69,14 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     out.into()
 }
 
-#[proc_macro_derive(DeserializeTuple, attributes(serde_tuple))]
+#[proc_macro_derive(Deserialize_tuple, attributes(serde_tuple))]
 pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;
 
     let ident_str = &ident.to_string();
-    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
+    let (_, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let (field_tys, field_calls): (Vec<_>, Vec<_>) = item.fields
         .iter()
