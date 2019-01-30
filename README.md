@@ -15,7 +15,7 @@ pub struct Foo<'a> {
     baz: i32
 }
 
-let foo = Foo { string: "Yes".into(), baz: 22
+let foo = Foo { string: "Yes".into(), baz: 22 };
 let json = serde_json::to_string(&foo).unwrap();
 println!("{}", &json);
 // # => ["Yes",22]
