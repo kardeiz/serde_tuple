@@ -4,7 +4,7 @@ use std::borrow::Cow;
 
 #[derive(Debug, Serialize_tuple, Deserialize_tuple)]
 pub struct Foo<'a, T: serde::Serialize + serde::de::DeserializeOwned> {
-    string: Cow<'a, str>,
+    string: &'a str,
     baz: i32,
     other: T
 }
