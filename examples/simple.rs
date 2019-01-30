@@ -2,32 +2,28 @@ use serde_tuple::*;
 
 use std::borrow::Cow;
 
-#[derive(Debug, SerializeTuple, DeserializeMaybeTuple)]
-pub struct Foo {
-    #[serde(rename = "b-a-r")]
-    #[serde_tuple(position = 1)]
-    bar: Cow<'static, str>,
-    #[serde_tuple(position = 0)]
-    baz: i32
+
+#[derive(Debug, SerializeTuple, DeserializeTuple)]
+pub struct Foo<'a, T: serde::Serialize + serde::de::DeserializeOwned> {
+    string: Cow<'a, str>,
+    baz: i32,
+    other: T
 }
 
-#[derive(serde_derive::Serialize)]
+#[derive(Debug, serde_derive::Serialize, serde_derive::Deserialize)]
 pub struct Bar {
-    foo: Foo
+    count: i32
 }
 
 fn main() {
-    let foo = Foo { bar: "Yes".into(), baz: 22 };
+    let foo = Foo { string: "Yes".into(), baz: 22, other: Bar { count: 3 } };
 
     let json = serde_json::to_string_pretty(&foo).unwrap();
 
     println!("{}", &json);
 
-    let foo = serde_json::from_str::<Foo>(&json).unwrap();
+    let foo = serde_json::from_str::<Foo<Bar>>(&json).unwrap();
 
     println!("{:?}", &foo);
 
-    let foo = serde_json::from_str::<Foo>("{\"b-a-r\": \"Yes\", \"baz\": 22 }").unwrap();
-
-    println!("{:?}", &foo);
 }
