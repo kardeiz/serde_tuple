@@ -73,7 +73,8 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
         .map(|field| {
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
-            (quote!(&'serde_tuple_inner #ty), quote!(&self.#ident))
+            let attrs = &field.attrs;
+            (quote!(#(#attrs)* &'serde_tuple_inner #ty), quote!(&self.#ident))
         })
         .unzip();
 
@@ -136,7 +137,8 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
         .map(|(idx, field)| {
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
-            (quote!(#ty), quote!(#ident: inner.#idx))
+            let attrs = &field.attrs;
+            (quote!(#(#attrs)* #ty), quote!(#ident: inner.#idx))
         })
         .unzip();
 

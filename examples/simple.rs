@@ -7,6 +7,7 @@ use std::borrow::Cow;
 #[serde(deny_unknown_fields)]
 pub struct Foo<'a, T: serde::Serialize + serde::de::DeserializeOwned> {
     string: &'a str,
+    #[serde(skip)]
     baz: i32,
     other: T
 }
