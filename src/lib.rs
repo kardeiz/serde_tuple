@@ -102,8 +102,6 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
         }
     };
 
-    panic!("{}", &out);
-
     out.into()
 }
 
