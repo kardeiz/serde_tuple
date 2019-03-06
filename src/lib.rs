@@ -43,12 +43,28 @@ impl parse::Parse for WrappedItemStruct {
     }
 }
 
-#[proc_macro_derive(Serialize_tuple, attributes(serde_tuple))]
+#[proc_macro_derive(Serialize_tuple, attributes(serde))]
 pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;
     let ident_str = &ident.to_string();
+    let attrs = &item.attrs;
+
+    let serde_rename_line = if attrs.iter()
+        .flat_map(|x| x.parse_meta() )
+        .filter_map(|x| match x { Meta::List(y) => Some(y), _ => None })
+        .filter(|x| x.ident == "serde" )
+        .flat_map(|x| x.nested.into_iter() )
+        .filter_map(|x| match x { NestedMeta::Meta(y) => Some(y), _ => None })
+        .filter_map(|x| match x { Meta::NameValue(y) => Some(y), _ => None })
+        .find(|x| x.ident == "rename" )
+        .is_some() {
+        None
+    } else {
+        Some(quote!(#[serde(rename = #ident_str)]))
+    };
+
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let (field_tys, field_calls): (Vec<_>, Vec<_>) = item
@@ -76,7 +92,8 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
                 S: serde::Serializer
             {
                 #[derive(serde_derive::Serialize)]
-                #[serde(rename = #ident_str)]
+                #serde_rename_line
+                #(#attrs)*
                 struct Inner #inner_ty_generics (#(#field_tys,)*);
 
                 let inner = Inner(#(#field_calls,)*);
@@ -85,16 +102,33 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
         }
     };
 
+    panic!("{}", &out);
+
     out.into()
 }
 
-#[proc_macro_derive(Deserialize_tuple, attributes(serde_tuple))]
+#[proc_macro_derive(Deserialize_tuple, attributes(serde))]
 pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;
-
     let ident_str = &ident.to_string();
+    let attrs = &item.attrs;
+
+    let serde_rename_line = if attrs.iter()
+        .flat_map(|x| x.parse_meta() )
+        .filter_map(|x| match x { Meta::List(y) => Some(y), _ => None })
+        .filter(|x| x.ident == "serde" )
+        .flat_map(|x| x.nested.into_iter() )
+        .filter_map(|x| match x { NestedMeta::Meta(y) => Some(y), _ => None })
+        .filter_map(|x| match x { Meta::NameValue(y) => Some(y), _ => None })
+        .find(|x| x.ident == "rename" )
+        .is_some() {
+        None
+    } else {
+        Some(quote!(#[serde(rename = #ident_str)]))
+    };
+
     let (_, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let (field_tys, field_calls): (Vec<_>, Vec<_>) = item
@@ -129,7 +163,8 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
                 D: serde::Deserializer<'de>,
             {
                 #[derive(serde_derive::Deserialize)]
-                #[serde(rename = #ident_str)]
+                #serde_rename_line
+                #(#attrs)*
                 struct Inner #ty_generics (#(#field_tys,)*);
                 let inner: Inner #ty_generics = serde::Deserialize::deserialize(deserializer)?;
                 Ok(#ident {
