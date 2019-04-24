@@ -135,6 +135,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
         .iter()
         .enumerate()
         .map(|(idx, field)| {
+            let idx = syn::Index::from(idx);
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
             let attrs = &field.attrs;
