@@ -17,7 +17,7 @@
 //! // # => ["Yes",22]
 //! ```
 
-#![recursion_limit = "128"]
+#![recursion_limit = "4096"]
 
 extern crate proc_macro;
 
