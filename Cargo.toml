@@ -2,20 +2,20 @@
 authors = ["Jacob Brown <kardeiz@gmail.com>"]
 edition = "2018"
 name = "serde_tuple"
-version = "0.3.0"
+version = "0.4.0"
 description = "De/serialize structs with named fields as array of values"
 license = "MIT"
 repository = "https://github.com/kardeiz/serde_tuple"
 readme = "README.md"
 
 [dependencies]
-proc-macro2 = "0.4.26"
-quote = "0.6.11"
+proc-macro2 = "1"
+quote = "1"
 serde = { version = "1", features = ["derive"] }
 
 [dependencies.syn]
 features = ["full", "extra-traits"]
-version = "0.15.26"
+version = "1"
 
 [dev-dependencies]
 serde_json = "1.0.37"

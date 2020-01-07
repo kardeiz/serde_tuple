@@ -12,7 +12,7 @@ pub struct Foo<'a, T: serde::Serialize + serde::de::DeserializeOwned> {
     other: T,
 }
 
-#[derive(Debug, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct Bar {
     count: i32,
 }

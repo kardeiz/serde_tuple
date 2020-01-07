@@ -51,6 +51,9 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let ident_str = &ident.to_string();
     let attrs = &item.attrs;
 
+    let serde_path: Path = parse_quote!(serde);
+    let rename_path: Path = parse_quote!(rename);
+
     let serde_rename_line = if attrs
         .iter()
         .flat_map(|x| x.parse_meta())
@@ -58,7 +61,7 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
             Meta::List(y) => Some(y),
             _ => None,
         })
-        .filter(|x| x.ident == "serde")
+        .filter(|x| x.path == serde_path)
         .flat_map(|x| x.nested.into_iter())
         .filter_map(|x| match x {
             NestedMeta::Meta(y) => Some(y),
@@ -68,7 +71,7 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
             Meta::NameValue(y) => Some(y),
             _ => None,
         })
-        .find(|x| x.ident == "rename")
+        .find(|x| x.path == rename_path)
         .is_some()
     {
         None
@@ -125,6 +128,9 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let ident_str = &ident.to_string();
     let attrs = &item.attrs;
 
+    let serde_path: Path = parse_quote!(serde);
+    let rename_path: Path = parse_quote!(rename);
+
     let serde_rename_line = if attrs
         .iter()
         .flat_map(|x| x.parse_meta())
@@ -132,7 +138,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
             Meta::List(y) => Some(y),
             _ => None,
         })
-        .filter(|x| x.ident == "serde")
+        .filter(|x| x.path == serde_path)
         .flat_map(|x| x.nested.into_iter())
         .filter_map(|x| match x {
             NestedMeta::Meta(y) => Some(y),
@@ -142,7 +148,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
             Meta::NameValue(y) => Some(y),
             _ => None,
         })
-        .find(|x| x.ident == "rename")
+        .find(|x| &x.path == &rename_path)
         .is_some()
     {
         None
