@@ -3,14 +3,14 @@ use serde_tuple::*;
 use std::borrow::Cow;
 
 #[derive(Debug, Serialize_tuple, Deserialize_tuple)]
-#[serde(rename="FOO")]
-#[serde(deny_unknown_fields)]
-pub struct Foo<'a, T: serde::Serialize + serde::de::DeserializeOwned> {
-    string: &'a str,
-    #[serde(skip)]
-    baz: i32,
-    other: T
+pub struct Foo<'a> {
+    bar: &'a str,
+    baz: i32
 }
+
+// #[derive(Debug, Serialize_tuple, Deserialize_tuple)]
+// pub struct Foo {
+// }
 
 #[derive(Debug, serde_derive::Serialize, serde_derive::Deserialize)]
 pub struct Bar {
@@ -18,13 +18,15 @@ pub struct Bar {
 }
 
 fn main() {
-    let foo = Foo { string: "Yes".into(), baz: 22, other: Bar { count: 3 } };
+    let foo = Foo { bar: "Yes".into(), baz: 22 };
 
-    let json = serde_json::to_string_pretty(&foo).unwrap();
+    // let json = serde_json::to_string_pretty(&foo).unwrap();
 
-    println!("{}", &json);
+    // println!("{}", &json);
 
-    let foo = serde_json::from_str::<Foo<Bar>>(&json).unwrap();
+    // let foo = serde_json::from_str::<Foo<Bar>>(&json).unwrap();
+
+    // let foo = Foo;
 
     println!("{:?}", &foo);
 }
