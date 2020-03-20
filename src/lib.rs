@@ -17,191 +17,388 @@
 //! // # => ["Yes",22]
 //! ```
 
-#![recursion_limit = "4096"]
+pub use serde_tuple_macros::*;
 
-extern crate proc_macro;
+#[doc(hidden)]
+pub struct Serializer<S>(pub S);
 
-use proc_macro::TokenStream;
-use proc_macro2::Span;
-use quote::quote;
-use syn::*;
+impl<S> serde::Serializer for Serializer<S>
+where
+    S: serde::Serializer,
+{
+    type Ok = S::Ok;
+    type Error = S::Error;
+    type SerializeSeq = S::SerializeSeq;
+    type SerializeTuple = S::SerializeTuple;
+    type SerializeTupleStruct = S::SerializeTupleStruct;
+    type SerializeTupleVariant = S::SerializeTupleVariant;
+    type SerializeMap = S::SerializeMap;
+    type SerializeStruct = S::SerializeStruct;
+    type SerializeStructVariant = S::SerializeStructVariant;
 
-struct WrappedItemStruct(pub ItemStruct);
+    fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_bool(v)
+    }
 
-impl parse::Parse for WrappedItemStruct {
-    fn parse(input: parse::ParseStream) -> parse::Result<Self> {
-        let call_site = Span::call_site();
-        if let Ok(item) = ItemStruct::parse(input) {
-            if let Fields::Unnamed(_) = item.fields {
-                Err(Error::new(call_site, "struct fields must be named"))
-            } else {
-                Ok(WrappedItemStruct(item))
-            }
-        } else {
-            Err(Error::new(call_site, "input must be a struct"))
-        }
+    fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_i8(v)
+    }
+
+    fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_i16(v)
+    }
+
+    fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_i32(v)
+    }
+
+    fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_i64(v)
+    }
+
+    fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_u8(v)
+    }
+
+    fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_u16(v)
+    }
+
+    fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_u32(v)
+    }
+
+    fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_u64(v)
+    }
+
+    fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_f32(v)
+    }
+
+    fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_f64(v)
+    }
+
+    fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_char(v)
+    }
+
+    fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_str(v)
+    }
+
+    fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_bytes(v)
+    }
+
+    fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_none()
+    }
+
+    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
+    where
+        T: serde::Serialize,
+    {
+        self.0.serialize_some(value)
+    }
+
+    fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_unit()
+    }
+
+    fn serialize_unit_struct(self, name: &'static str) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_unit_struct(name)
+    }
+
+    fn serialize_unit_variant(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+    ) -> Result<Self::Ok, Self::Error> {
+        self.0.serialize_unit_variant(name, variant_index, variant)
+    }
+
+    fn serialize_newtype_struct<T: ?Sized>(
+        self,
+        name: &'static str,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error>
+    where
+        T: serde::Serialize,
+    {
+        use serde::ser::SerializeTupleStruct;
+        let mut out = self.serialize_tuple_struct(name, 1)?;
+        out.serialize_field(value)?;
+        out.end()
+    }
+
+    fn serialize_newtype_variant<T: ?Sized>(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error>
+    where
+        T: serde::Serialize,
+    {
+        self.0.serialize_newtype_variant(name, variant_index, variant, value)
+    }
+
+    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
+        self.0.serialize_seq(len)
+    }
+
+    fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
+        self.0.serialize_tuple(len)
+    }
+
+    fn serialize_tuple_struct(
+        self,
+        name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleStruct, Self::Error> {
+        self.0.serialize_tuple_struct(name, len)
+    }
+
+    fn serialize_tuple_variant(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleVariant, Self::Error> {
+        self.0.serialize_tuple_variant(name, variant_index, variant, len)
+    }
+
+    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
+        self.0.serialize_map(len)
+    }
+
+    fn serialize_struct(
+        self,
+        name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStruct, Self::Error> {
+        self.0.serialize_struct(name, len)
+    }
+
+    fn serialize_struct_variant(
+        self,
+        name: &'static str,
+        variant_index: u32,
+        variant: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStructVariant, Self::Error> {
+        self.0.serialize_struct_variant(name, variant_index, variant, len)
     }
 }
 
-#[proc_macro_derive(Serialize_tuple, attributes(serde))]
-pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
-    let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
+#[doc(hidden)]
+pub struct Deserializer<D>(pub D);
 
-    let ident = &item.ident;
-    let ident_str = &ident.to_string();
-    let attrs = &item.attrs;
-
-    let serde_path: Path = parse_quote!(serde);
-    let rename_path: Path = parse_quote!(rename);
-
-    let serde_rename_line = if attrs
-        .iter()
-        .flat_map(|x| x.parse_meta())
-        .filter_map(|x| match x {
-            Meta::List(y) => Some(y),
-            _ => None,
-        })
-        .filter(|x| x.path == serde_path)
-        .flat_map(|x| x.nested.into_iter())
-        .filter_map(|x| match x {
-            NestedMeta::Meta(y) => Some(y),
-            _ => None,
-        })
-        .filter_map(|x| match x {
-            Meta::NameValue(y) => Some(y),
-            _ => None,
-        })
-        .find(|x| x.path == rename_path)
-        .is_some()
+impl<'de, D> serde::de::Deserializer<'de> for Deserializer<D>
+where
+    D: serde::de::Deserializer<'de>,
+{
+    type Error = D::Error;
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
     {
-        None
-    } else {
-        Some(quote!(#[serde(rename = #ident_str)]))
-    };
-
-    let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
-
-    let (field_tys, field_calls): (Vec<_>, Vec<_>) = item
-        .fields
-        .iter()
-        .map(|field| {
-            let ident = field.ident.as_ref().unwrap();
-            let ty = &field.ty;
-            let attrs = &field.attrs;
-            (quote!(#(#attrs)* &'serde_tuple_inner #ty), quote!(&self.#ident))
-        })
-        .unzip();
-
-    let mut inner_generics = item.generics.clone();
-
-    let inner_lifetime_def: LifetimeDef = parse_quote!('serde_tuple_inner);
-
-    inner_generics.params.push(inner_lifetime_def.into());
-
-    let (_, inner_ty_generics, _) = inner_generics.split_for_impl();
-
-    let out = quote! {
-        impl #impl_generics serde::Serialize for #ident #ty_generics #where_clause {
-            fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
-            where
-                S: serde::Serializer
-            {
-                #[derive(serde::Serialize)]
-                #serde_rename_line
-                #(#attrs)*
-                struct Inner #inner_ty_generics (#(#field_tys,)*);
-
-                let inner = Inner(#(#field_calls,)*);
-                serde::Serialize::serialize(&inner, serializer)
-            }
-        }
-    };
-
-    out.into()
-}
-
-#[proc_macro_derive(Deserialize_tuple, attributes(serde))]
-pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
-    let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
-
-    let ident = &item.ident;
-    let ident_str = &ident.to_string();
-    let attrs = &item.attrs;
-
-    let serde_path: Path = parse_quote!(serde);
-    let rename_path: Path = parse_quote!(rename);
-
-    let serde_rename_line = if attrs
-        .iter()
-        .flat_map(|x| x.parse_meta())
-        .filter_map(|x| match x {
-            Meta::List(y) => Some(y),
-            _ => None,
-        })
-        .filter(|x| x.path == serde_path)
-        .flat_map(|x| x.nested.into_iter())
-        .filter_map(|x| match x {
-            NestedMeta::Meta(y) => Some(y),
-            _ => None,
-        })
-        .filter_map(|x| match x {
-            Meta::NameValue(y) => Some(y),
-            _ => None,
-        })
-        .find(|x| &x.path == &rename_path)
-        .is_some()
+        self.0.deserialize_any(visitor)
+    }
+    fn deserialize_bool<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
     {
-        None
-    } else {
-        Some(quote!(#[serde(rename = #ident_str)]))
-    };
-
-    let (_, ty_generics, where_clause) = item.generics.split_for_impl();
-
-    let (field_tys, field_calls): (Vec<_>, Vec<_>) = item
-        .fields
-        .iter()
-        .enumerate()
-        .map(|(idx, field)| {
-            let idx = syn::Index::from(idx);
-            let ident = field.ident.as_ref().unwrap();
-            let ty = &field.ty;
-            let attrs = &field.attrs;
-            (quote!(#(#attrs)* #ty), quote!(#ident: inner.#idx))
-        })
-        .unzip();
-
-    let mut de_generics = item.generics.clone();
-
-    let de_generics_lifetimes = de_generics.lifetimes().collect::<Vec<_>>();
-
-    let de_lifetime_def: LifetimeDef = if de_generics_lifetimes.is_empty() {
-        parse_quote!('de)
-    } else {
-        parse_quote!('de: #(#de_generics_lifetimes)+*)
-    };
-
-    de_generics.params.push(de_lifetime_def.into());
-
-    let (de_impl_generics, ..) = de_generics.split_for_impl();
-
-    let out = quote! {
-        impl #de_impl_generics serde::Deserialize<'de> for #ident #ty_generics #where_clause {
-            fn deserialize<D>(deserializer: D) -> core::result::Result<Self, D::Error>
-            where
-                D: serde::Deserializer<'de>,
-            {
-                #[derive(serde::Deserialize)]
-                #serde_rename_line
-                #(#attrs)*
-                struct Inner #ty_generics (#(#field_tys,)*);
-                let inner: Inner #ty_generics = serde::Deserialize::deserialize(deserializer)?;
-                core::result::Result::Ok(#ident {
-                    #(#field_calls,)*
-                })
-            }
-        }
-    };
-
-    out.into()
+        self.0.deserialize_bool(visitor)
+    }
+    fn deserialize_i8<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_i8(visitor)
+    }
+    fn deserialize_i16<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_i16(visitor)
+    }
+    fn deserialize_i32<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_i32(visitor)
+    }
+    fn deserialize_i64<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_i64(visitor)
+    }
+    fn deserialize_u8<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_u8(visitor)
+    }
+    fn deserialize_u16<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_u16(visitor)
+    }
+    fn deserialize_u32<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_u32(visitor)
+    }
+    fn deserialize_u64<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_u64(visitor)
+    }
+    fn deserialize_f32<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_f32(visitor)
+    }
+    fn deserialize_f64<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_f64(visitor)
+    }
+    fn deserialize_char<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_char(visitor)
+    }
+    fn deserialize_str<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_str(visitor)
+    }
+    fn deserialize_string<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_string(visitor)
+    }
+    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_bytes(visitor)
+    }
+    fn deserialize_byte_buf<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_byte_buf(visitor)
+    }
+    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_option(visitor)
+    }
+    fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_unit(visitor)
+    }
+    fn deserialize_unit_struct<V>(
+        self,
+        name: &'static str,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_unit_struct(name, visitor)
+    }
+    fn deserialize_newtype_struct<V>(
+        self,
+        name: &'static str,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_tuple_struct(name, 1, visitor)
+    }
+    fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_seq(visitor)
+    }
+    fn deserialize_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_tuple(len, visitor)
+    }
+    fn deserialize_tuple_struct<V>(
+        self,
+        name: &'static str,
+        len: usize,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_tuple_struct(name, len, visitor)
+    }
+    fn deserialize_map<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_map(visitor)
+    }
+    fn deserialize_struct<V>(
+        self,
+        name: &'static str,
+        fields: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_struct(name, fields, visitor)
+    }
+    fn deserialize_enum<V>(
+        self,
+        name: &'static str,
+        variants: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_enum(name, variants, visitor)
+    }
+    fn deserialize_identifier<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_identifier(visitor)
+    }
+    fn deserialize_ignored_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0.deserialize_ignored_any(visitor)
+    }
 }
