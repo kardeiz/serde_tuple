@@ -16,6 +16,7 @@
 //! println!("{}", &json);
 //! // # => ["Yes",22]
 //! ```
+#![no_std]
 
 pub use serde_tuple_macros::*;
 
