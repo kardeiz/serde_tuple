@@ -1,3 +1,4 @@
 /target
+/serde_tuple_macros/target
 **/*.rs.bk
 Cargo.lock
