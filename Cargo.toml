@@ -10,7 +10,7 @@ readme = "README.md"
 
 [dependencies]
 serde_tuple_macros = { version = "1.0.0", path = "serde_tuple_macros" }
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1", features = ["derive"], default-features = false}
 
 [dev-dependencies]
 serde_json = "1.0.37"
