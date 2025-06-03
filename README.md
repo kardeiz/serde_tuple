@@ -38,7 +38,7 @@ See also [this issue](https://github.com/dtolnay/request-for-implementation/issu
 
 ## License
 
-Licensed under MIT license ([LICENSE](LICENSE) or <https://opensource.org/licenses/MIT>)
+Licensed under MIT license ([LICENSE](./LICENSE) or <https://opensource.org/licenses/MIT>)
   at your option.
 
 ### Contribution
