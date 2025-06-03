@@ -6,8 +6,8 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parse, parse_macro_input, parse_quote, Error, Fields, Index, ItemStruct, LifetimeDef, Meta,
-    NestedMeta, Path, Result,
+    parse, parse_macro_input, parse_quote, Attribute, Error, Fields, Index, ItemStruct,
+    LifetimeDef, Meta, NestedMeta, Path, Result,
 };
 
 struct WrappedItemStruct(ItemStruct);
@@ -32,35 +32,8 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;
-    let ident_str = &ident.to_string();
     let attrs = &item.attrs;
-
-    let serde_path: Path = parse_quote!(serde);
-    let rename_path: Path = parse_quote!(rename);
-
-    let serde_rename_line = if attrs
-        .iter()
-        .flat_map(syn::Attribute::parse_meta)
-        .filter_map(|x| match x {
-            Meta::List(y) => Some(y),
-            _ => None,
-        })
-        .filter(|x| x.path == serde_path)
-        .flat_map(|x| x.nested.into_iter())
-        .filter_map(|x| match x {
-            NestedMeta::Meta(y) => Some(y),
-            NestedMeta::Lit(_) => None,
-        })
-        .filter_map(|x| match x {
-            Meta::NameValue(y) => Some(y),
-            _ => None,
-        })
-        .any(|x| x.path == rename_path)
-    {
-        None
-    } else {
-        Some(quote!(#[serde(rename = #ident_str)]))
-    };
+    let serde_rename_line = parse_attrs(&item);
 
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
 
@@ -111,36 +84,8 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;
-    let ident_str = &ident.to_string();
     let attrs = &item.attrs;
-
-    let serde_path: Path = parse_quote!(serde);
-    let rename_path: Path = parse_quote!(rename);
-
-    let serde_rename_line = if attrs
-        .iter()
-        .flat_map(syn::Attribute::parse_meta)
-        .filter_map(|x| match x {
-            Meta::List(y) => Some(y),
-            _ => None,
-        })
-        .filter(|x| x.path == serde_path)
-        .flat_map(|x| x.nested.into_iter())
-        .filter_map(|x| match x {
-            NestedMeta::Meta(y) => Some(y),
-            NestedMeta::Lit(_) => None,
-        })
-        .filter_map(|x| match x {
-            Meta::NameValue(y) => Some(y),
-            _ => None,
-        })
-        .any(|x| x.path == rename_path)
-    {
-        None
-    } else {
-        Some(quote!(#[serde(rename = #ident_str)]))
-    };
-
+    let serde_rename_line = parse_attrs(&item);
     let (_, ty_generics, where_clause) = item.generics.split_for_impl();
 
     let (field_tys, field_calls): (Vec<_>, Vec<_>) = item
@@ -190,4 +135,35 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     };
 
     out.into()
+}
+
+fn parse_attrs(item: &ItemStruct) -> Option<proc_macro2::TokenStream> {
+    let serde_path: Path = parse_quote!(serde);
+    let rename_path: Path = parse_quote!(rename);
+
+    if item
+        .attrs
+        .iter()
+        .flat_map(Attribute::parse_meta)
+        .filter_map(|x| match x {
+            Meta::List(y) => Some(y),
+            _ => None,
+        })
+        .filter(|x| x.path == serde_path)
+        .flat_map(|x| x.nested.into_iter())
+        .filter_map(|x| match x {
+            NestedMeta::Meta(y) => Some(y),
+            NestedMeta::Lit(_) => None,
+        })
+        .filter_map(|x| match x {
+            Meta::NameValue(y) => Some(y),
+            _ => None,
+        })
+        .any(|x| x.path == rename_path)
+    {
+        None
+    } else {
+        let ident_str = &item.ident.to_string();
+        Some(quote!(#[serde(rename = #ident_str)]))
+    }
 }
