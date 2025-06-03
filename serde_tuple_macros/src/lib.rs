@@ -5,12 +5,15 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::*;
+use syn::{
+    parse, parse_macro_input, parse_quote, Error, Fields, Index, ItemStruct, LifetimeDef, Meta,
+    NestedMeta, Path, Result,
+};
 
 struct WrappedItemStruct(ItemStruct);
 
 impl parse::Parse for WrappedItemStruct {
-    fn parse(input: parse::ParseStream) -> parse::Result<Self> {
+    fn parse(input: parse::ParseStream) -> Result<Self> {
         let call_site = Span::call_site();
         if let Ok(item) = ItemStruct::parse(input) {
             if let Fields::Unnamed(_) = item.fields {
@@ -37,7 +40,7 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
 
     let serde_rename_line = if attrs
         .iter()
-        .flat_map(|x| x.parse_meta())
+        .flat_map(syn::Attribute::parse_meta)
         .filter_map(|x| match x {
             Meta::List(y) => Some(y),
             _ => None,
@@ -46,14 +49,13 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
         .flat_map(|x| x.nested.into_iter())
         .filter_map(|x| match x {
             NestedMeta::Meta(y) => Some(y),
-            _ => None,
+            NestedMeta::Lit(_) => None,
         })
         .filter_map(|x| match x {
             Meta::NameValue(y) => Some(y),
             _ => None,
         })
-        .find(|x| x.path == rename_path)
-        .is_some()
+        .any(|x| x.path == rename_path)
     {
         None
     } else {
@@ -69,7 +71,10 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
             let attrs = &field.attrs;
-            (quote!(#(#attrs)* &'serde_tuple_inner #ty), quote!(&self.#ident))
+            (
+                quote!(#(#attrs)* &'serde_tuple_inner #ty),
+                quote!(&self.#ident),
+            )
         })
         .unzip();
 
@@ -114,7 +119,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
 
     let serde_rename_line = if attrs
         .iter()
-        .flat_map(|x| x.parse_meta())
+        .flat_map(syn::Attribute::parse_meta)
         .filter_map(|x| match x {
             Meta::List(y) => Some(y),
             _ => None,
@@ -123,14 +128,13 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
         .flat_map(|x| x.nested.into_iter())
         .filter_map(|x| match x {
             NestedMeta::Meta(y) => Some(y),
-            _ => None,
+            NestedMeta::Lit(_) => None,
         })
         .filter_map(|x| match x {
             Meta::NameValue(y) => Some(y),
             _ => None,
         })
-        .find(|x| &x.path == &rename_path)
-        .is_some()
+        .any(|x| x.path == rename_path)
     {
         None
     } else {
@@ -144,7 +148,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
         .iter()
         .enumerate()
         .map(|(idx, field)| {
-            let idx = syn::Index::from(idx);
+            let idx = Index::from(idx);
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
             let attrs = &field.attrs;

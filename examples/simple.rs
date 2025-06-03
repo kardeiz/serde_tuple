@@ -1,6 +1,4 @@
-use serde_tuple::*;
-
-use std::borrow::Cow;
+use serde_tuple_macros::{Deserialize_tuple, Serialize_tuple};
 
 #[derive(Debug, Serialize_tuple, Deserialize_tuple)]
 #[serde(rename = "FOO")]
@@ -20,16 +18,18 @@ pub struct Bar {
     count: i32,
 }
 
-struct Ok;
-
 fn main() {
-    let foo = Foo { string: "Yes".into(), baz: 22, other: Bar { count: 3 } };
+    let foo = Foo {
+        string: "Yes",
+        baz: 22,
+        other: Bar { count: 3 },
+    };
 
     let json = serde_json::to_string_pretty(&foo).unwrap();
 
-    println!("{}", &json);
+    println!("{json}");
 
     let foo = serde_json::from_str::<Foo<Bar>>(&json).unwrap();
 
-    println!("{:?}", &foo);
+    println!("{foo:?}");
 }

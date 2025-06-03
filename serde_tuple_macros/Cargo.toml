@@ -1,20 +1,22 @@
 [package]
-authors = ["Jacob Brown <kardeiz@gmail.com>"]
-edition = "2018"
 name = "serde_tuple_macros"
-version = "1.0.1"
 description = "Internal proc-macro crate for serde_tuple"
-license = "MIT"
-repository = "https://github.com/kardeiz/serde_tuple"
+version = "1.0.1"
 readme = "../README.md"
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+proc-macro = true
 
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
+syn = { version = "1", features = ["full", "extra-traits"] }
 
-[dependencies.syn]
-features = ["full", "extra-traits"]
-version = "1"
-
-[lib]
-proc-macro = true
+[lints]
+workspace = true

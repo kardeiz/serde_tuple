@@ -1,22 +1,7 @@
-//! Derive macros to serialize and deserialize struct with named fields as an array of values
-//!
-//! # Examples
-//!
-//! ```
-//! use serde_tuple::*;
-//!
-//! #[derive(Serialize_tuple, Deserialize_tuple)]
-//! pub struct Foo<'a> {
-//!     bar: &'a str,
-//!     baz: i32
-//! }
+#![cfg_attr(feature = "default", doc = include_str!("../README.md"))]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-//! let foo = Foo { bar: "Yes", baz: 22 };
-//! let json = serde_json::to_string(&foo).unwrap();
-//! println!("{}", &json);
-//! // # => ["Yes",22]
-//! ```
-#![no_std]
+use std::fmt::Display;
 
 pub use serde_tuple_macros::*;
 
@@ -36,6 +21,10 @@ where
     type SerializeMap = S::SerializeMap;
     type SerializeStruct = S::SerializeStruct;
     type SerializeStructVariant = S::SerializeStructVariant;
+
+    fn collect_str<T: Display + ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> {
+        self.serialize_str(&value.to_string())
+    }
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
         self.0.serialize_bool(v)
@@ -97,10 +86,10 @@ where
         self.0.serialize_none()
     }
 
-    fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
-    where
-        T: serde::Serialize,
-    {
+    fn serialize_some<T: serde::Serialize + ?Sized>(
+        self,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error> {
         self.0.serialize_some(value)
     }
 
@@ -121,31 +110,26 @@ where
         self.0.serialize_unit_variant(name, variant_index, variant)
     }
 
-    fn serialize_newtype_struct<T: ?Sized>(
+    fn serialize_newtype_struct<T: serde::Serialize + ?Sized>(
         self,
         name: &'static str,
         value: &T,
-    ) -> Result<Self::Ok, Self::Error>
-    where
-        T: serde::Serialize,
-    {
+    ) -> Result<Self::Ok, Self::Error> {
         use serde::ser::SerializeTupleStruct;
         let mut out = self.serialize_tuple_struct(name, 1)?;
         out.serialize_field(value)?;
         out.end()
     }
 
-    fn serialize_newtype_variant<T: ?Sized>(
+    fn serialize_newtype_variant<T: serde::Serialize + ?Sized>(
         self,
         name: &'static str,
         variant_index: u32,
         variant: &'static str,
         value: &T,
-    ) -> Result<Self::Ok, Self::Error>
-    where
-        T: serde::Serialize,
-    {
-        self.0.serialize_newtype_variant(name, variant_index, variant, value)
+    ) -> Result<Self::Ok, Self::Error> {
+        self.0
+            .serialize_newtype_variant(name, variant_index, variant, value)
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
@@ -171,7 +155,8 @@ where
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
-        self.0.serialize_tuple_variant(name, variant_index, variant, len)
+        self.0
+            .serialize_tuple_variant(name, variant_index, variant, len)
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
@@ -193,7 +178,8 @@ where
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        self.0.serialize_struct_variant(name, variant_index, variant, len)
+        self.0
+            .serialize_struct_variant(name, variant_index, variant, len)
     }
 }
 
