@@ -1,10 +1,11 @@
 # `serde_tuple`
 
-[![GitHub](https://img.shields.io/badge/github-kardeiz/serde_tuple-8da0cb?logo=github)](https://github.com/kardeiz/serde_tuple)
+[![GitHub repo](https://img.shields.io/badge/github-kardeiz/serde_tuple-8da0cb?logo=github)](https://github.com/kardeiz/serde_tuple)
 [![crates.io version](https://img.shields.io/crates/v/serde_tuple)](https://crates.io/crates/serde_tuple)
-[![docs.rs](https://img.shields.io/docsrs/serde_tuple)](https://docs.rs/serde_tuple)
+[![docs.rs status](https://img.shields.io/docsrs/serde_tuple)](https://docs.rs/serde_tuple)
 [![crates.io license](https://img.shields.io/crates/l/serde_tuple)](https://github.com/kardeiz/serde_tuple/blob/main/LICENSE)
-[![CI build](https://github.com/kardeiz/serde_tuple/actions/workflows/ci.yml/badge.svg)](https://github.com/kardeiz/serde_tuple/actions)
+[![CI build status](https://github.com/kardeiz/serde_tuple/actions/workflows/ci.yml/badge.svg)](https://github.com/kardeiz/serde_tuple/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/kardeiz/serde_tuple)](https://app.codecov.io/gh/kardeiz/serde_tuple)
 
 Serialize and deserialize structs with named fields as an array of values using `Derive` macros.
 
