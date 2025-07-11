@@ -32,7 +32,8 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;
-    let attrs = &item.attrs;
+    // Only keep serde attributes for the inner struct
+    let serde_attrs: Vec<_> = item.attrs.iter().filter(|attr| attr.path.is_ident("serde")).collect();
     let serde_rename_line = parse_attrs(&item);
 
     let (impl_generics, ty_generics, where_clause) = item.generics.split_for_impl();
@@ -43,9 +44,10 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
         .map(|field| {
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
-            let attrs = &field.attrs;
+            // Only keep serde attributes for the inner struct field
+            let serde_field_attrs: Vec<_> = field.attrs.iter().filter(|attr| attr.path.is_ident("serde")).collect();
             (
-                quote!(#(#attrs)* &'serde_tuple_inner #ty),
+                quote!(#(#serde_field_attrs)* &'serde_tuple_inner #ty),
                 quote!(&self.#ident),
             )
         })
@@ -67,7 +69,7 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
             {
                 #[derive(serde::Serialize)]
                 #serde_rename_line
-                #(#attrs)*
+                #(#serde_attrs)*
                 struct Inner #inner_ty_generics (#(#field_tys,)*);
 
                 let inner = Inner(#(#field_calls,)*);
@@ -84,7 +86,8 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let WrappedItemStruct(item) = parse_macro_input!(input as WrappedItemStruct);
 
     let ident = &item.ident;
-    let attrs = &item.attrs;
+    // Only keep serde attributes for the inner struct
+    let serde_attrs: Vec<_> = item.attrs.iter().filter(|attr| attr.path.is_ident("serde")).collect();
     let serde_rename_line = parse_attrs(&item);
     let (_, ty_generics, where_clause) = item.generics.split_for_impl();
 
@@ -96,8 +99,9 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
             let idx = Index::from(idx);
             let ident = field.ident.as_ref().unwrap();
             let ty = &field.ty;
-            let attrs = &field.attrs;
-            (quote!(#(#attrs)* #ty), quote!(#ident: inner.#idx))
+            // Only keep serde attributes for the inner struct field
+            let serde_field_attrs: Vec<_> = field.attrs.iter().filter(|attr| attr.path.is_ident("serde")).collect();
+            (quote!(#(#serde_field_attrs)* #ty), quote!(#ident: inner.#idx))
         })
         .unzip();
 
@@ -123,7 +127,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
             {
                 #[derive(serde::Deserialize)]
                 #serde_rename_line
-                #(#attrs)*
+                #(#serde_attrs)*
                 struct Inner #ty_generics (#(#field_tys,)*);
                 let inner: Inner #ty_generics =
                     serde::Deserialize::deserialize(serde_tuple::Deserializer(deserializer))?;
