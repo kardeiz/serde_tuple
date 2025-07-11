@@ -38,7 +38,7 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let serde_attrs: Vec<_> = item
         .attrs
         .iter()
-        .filter(|attr| attr.path.is_ident("serde"))
+        .filter(|attr| attr.path().is_ident("serde"))
         .collect();
     let serde_rename_line = parse_attrs(&item);
 
@@ -54,7 +54,7 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
             let serde_field_attrs: Vec<_> = field
                 .attrs
                 .iter()
-                .filter(|attr| attr.path.is_ident("serde"))
+                .filter(|attr| attr.path().is_ident("serde"))
                 .collect();
             (
                 quote!(#(#serde_field_attrs)* &'serde_tuple_inner #ty),
@@ -100,7 +100,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let serde_attrs: Vec<_> = item
         .attrs
         .iter()
-        .filter(|attr| attr.path.is_ident("serde"))
+        .filter(|attr| attr.path().is_ident("serde"))
         .collect();
     let serde_rename_line = parse_attrs(&item);
     let (_, ty_generics, where_clause) = item.generics.split_for_impl();
@@ -117,7 +117,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
             let serde_field_attrs: Vec<_> = field
                 .attrs
                 .iter()
-                .filter(|attr| attr.path.is_ident("serde"))
+                .filter(|attr| attr.path().is_ident("serde"))
                 .collect();
             (
                 quote!(#(#serde_field_attrs)* #ty),
