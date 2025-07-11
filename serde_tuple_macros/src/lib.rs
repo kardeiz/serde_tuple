@@ -5,9 +5,11 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
 use syn::{
-    parse, parse_macro_input, parse_quote, Attribute, Error, Fields, Index, ItemStruct,
-    LifetimeDef, Meta, NestedMeta, Path, Result,
+    parse, parse_macro_input, parse_quote, Error, Fields, Index, ItemStruct, LifetimeParam, Meta,
+    Path, Result,
 };
 
 struct WrappedItemStruct(ItemStruct);
@@ -63,7 +65,7 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
 
     let mut inner_generics = item.generics.clone();
 
-    let inner_lifetime_def: LifetimeDef = parse_quote!('serde_tuple_inner);
+    let inner_lifetime_def: LifetimeParam = parse_quote!('serde_tuple_inner);
 
     inner_generics.params.push(inner_lifetime_def.into());
 
@@ -128,7 +130,7 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
 
     let de_generics_lifetimes = de_generics.lifetimes().collect::<Vec<_>>();
 
-    let de_lifetime_def: LifetimeDef = if de_generics_lifetimes.is_empty() {
+    let de_lifetime_def: LifetimeParam = if de_generics_lifetimes.is_empty() {
         parse_quote!('de)
     } else {
         parse_quote!('de: #(#de_generics_lifetimes)+*)
@@ -164,26 +166,25 @@ fn parse_attrs(item: &ItemStruct) -> Option<proc_macro2::TokenStream> {
     let serde_path: Path = parse_quote!(serde);
     let rename_path: Path = parse_quote!(rename);
 
-    if item
-        .attrs
-        .iter()
-        .flat_map(Attribute::parse_meta)
-        .filter_map(|x| match x {
-            Meta::List(y) => Some(y),
-            _ => None,
-        })
-        .filter(|x| x.path == serde_path)
-        .flat_map(|x| x.nested.into_iter())
-        .filter_map(|x| match x {
-            NestedMeta::Meta(y) => Some(y),
-            NestedMeta::Lit(_) => None,
-        })
-        .filter_map(|x| match x {
-            Meta::NameValue(y) => Some(y),
-            _ => None,
-        })
-        .any(|x| x.path == rename_path)
-    {
+    let mut found_rename = false;
+    for attr in &item.attrs {
+        if attr.path() != &serde_path {
+            continue;
+        }
+
+        if let Ok(meta_list) = attr.parse_args_with(Punctuated::<Meta, Comma>::parse_terminated) {
+            for meta in meta_list {
+                if let Meta::NameValue(nv) = meta {
+                    if nv.path == rename_path {
+                        found_rename = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if found_rename {
         None
     } else {
         let ident_str = &item.ident.to_string();
