@@ -21,6 +21,7 @@ serde_tuple_macros = { version = "1.0.1", path = "serde_tuple_macros" }
 
 [dev-dependencies]
 serde_json = "1.0.37"
+derivative = "2"
 
 [lints]
 workspace = true
