@@ -1,8 +1,6 @@
 #![cfg_attr(feature = "default", doc = include_str!("../README.md"))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use std::fmt::Display;
-
 pub use serde_tuple_macros::*;
 
 #[doc(hidden)]
@@ -22,7 +20,11 @@ where
     type SerializeStruct = S::SerializeStruct;
     type SerializeStructVariant = S::SerializeStructVariant;
 
-    fn collect_str<T: Display + ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> {
+    #[cfg(feature = "std")]
+    fn collect_str<T>(self, value: &T) -> Result<Self::Ok, Self::Error>
+    where
+        T: std::fmt::Display + ?Sized,
+    {
         self.serialize_str(&value.to_string())
     }
 

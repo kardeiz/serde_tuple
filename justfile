@@ -110,6 +110,7 @@ semver *args:  (cargo-install 'cargo-semver-checks')
 # Run all tests
 test:
     cargo test --workspace --all-targets {{features_flag}}
+    cargo test --workspace --all-targets --no-default-features
     cargo test --workspace --doc {{features_flag}}
 
 # Test documentation generation
