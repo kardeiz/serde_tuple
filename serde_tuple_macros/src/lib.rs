@@ -65,9 +65,10 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
 
     let mut inner_generics = item.generics.clone();
 
-    let inner_lifetime_def: LifetimeParam = parse_quote!('serde_tuple_inner);
-
-    inner_generics.params.push(inner_lifetime_def.into());
+    if !item.fields.is_empty() {
+        let inner_lifetime_def: LifetimeParam = parse_quote!('serde_tuple_inner);
+        inner_generics.params.push(inner_lifetime_def.into());
+    }
 
     let (_, inner_ty_generics, _) = inner_generics.split_for_impl();
 
