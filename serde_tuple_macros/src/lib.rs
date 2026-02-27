@@ -73,18 +73,18 @@ pub fn derive_serialize_tuple(input: TokenStream) -> TokenStream {
     let (_, inner_ty_generics, _) = inner_generics.split_for_impl();
 
     let out = quote! {
-        impl #impl_generics serde::Serialize for #ident #ty_generics #where_clause {
-            fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>
+        impl #impl_generics ::serde::Serialize for #ident #ty_generics #where_clause {
+            fn serialize<S>(&self, serializer: S) -> ::core::result::Result<S::Ok, S::Error>
             where
-                S: serde::Serializer
+                S: ::serde::Serializer
             {
-                #[derive(serde::Serialize)]
+                #[derive(::serde::Serialize)]
                 #serde_rename_line
                 #(#serde_attrs)*
                 struct Inner #inner_ty_generics (#(#field_tys,)*);
 
                 let inner = Inner(#(#field_calls,)*);
-                serde::Serialize::serialize(&inner, serde_tuple::Serializer(serializer))
+                ::serde::Serialize::serialize(&inner, ::serde_tuple::Serializer(serializer))
             }
         }
     };
@@ -142,18 +142,18 @@ pub fn derive_deserialize_tuple(input: TokenStream) -> TokenStream {
     let (de_impl_generics, ..) = de_generics.split_for_impl();
 
     let out = quote! {
-        impl #de_impl_generics serde::Deserialize<'de> for #ident #ty_generics #where_clause {
-            fn deserialize<D>(deserializer: D) -> core::result::Result<Self, D::Error>
+        impl #de_impl_generics ::serde::Deserialize<'de> for #ident #ty_generics #where_clause {
+            fn deserialize<D>(deserializer: D) -> ::core::result::Result<Self, D::Error>
             where
-                D: serde::Deserializer<'de>,
+                D: ::serde::Deserializer<'de>,
             {
-                #[derive(serde::Deserialize)]
+                #[derive(::serde::Deserialize)]
                 #serde_rename_line
                 #(#serde_attrs)*
                 struct Inner #ty_generics (#(#field_tys,)*);
                 let inner: Inner #ty_generics =
-                    serde::Deserialize::deserialize(serde_tuple::Deserializer(deserializer))?;
-                core::result::Result::Ok(#ident {
+                    ::serde::Deserialize::deserialize(::serde_tuple::Deserializer(deserializer))?;
+                ::core::result::Result::Ok(#ident {
                     #(#field_calls,)*
                 })
             }
